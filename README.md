@@ -8,17 +8,20 @@ For instructions on how to get started, see [the README](https://github.com/aker
 
 The [wiki page](https://github.com/akeranen/the-one/wiki) has the latest information.
 
----
-
 # 使用IDE进行二次开发
+
+## 环境需求
 
 - JDK版本推荐`1.8`及以下
 
-- 在`lib`中新增了`junit-3.8.1.jar`用以解决`src/test`下的报错，不添加jar包直接删去所有的测试文件也可以
+- 在`lib`中新增了`junit-4.3.1.jar`用以解决`src/test`下的报错，不添加jar包直接删去所有的测试文件也可以
 
-- 导入项目至IDEA或者Eclipse，配置好JDK和第三方lib路径，即可开始二次开发
+- 导入项目至IDEA或者Eclipse，配置好JDK和第三方lib路径(编译器有可能会自动识别)，即可开始二次开发
+  - 我使用的是IDEA，后面以此环境做阐述，没有本质区别
 
----
+- 建议将IDE的编译输出模块路径改为`target`与原项目一致，否则需要每次改动后手动运行`compile.bat`进行编译 ，再通过`one.bat`运行
+  - 比如会出现找不到自定义Router类的报错
+  - 修改后可以直接在IDE内运行或者Debug
 
 # 路由算法实现
 
