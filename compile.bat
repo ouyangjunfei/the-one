@@ -10,3 +10,5 @@ IF NOT EXIST "%targetdir%\gui\buttonGraphics" (
 	mkdir %targetdir%\gui\buttonGraphics
 	copy src\gui\buttonGraphics\* %targetdir%\gui\buttonGraphics\
 )
+
+pause
