@@ -8,9 +8,12 @@ For instructions on how to get started, see [the README](https://github.com/aker
 
 The [wiki page](https://github.com/akeranen/the-one/wiki) has the latest information.
 
-# 使用IDE进行二次开发
+## 文档参考
 
-## 环境需求
+The ONE [官方文档](https://github.com/akeranen/the-one/wiki/README)
+，其没有作为项目的README
+
+## 使用IDE进行二次开发
 
 - JDK版本推荐`1.8`及以下
 
@@ -23,9 +26,10 @@ The [wiki page](https://github.com/akeranen/the-one/wiki) has the latest informa
   - 比如会出现找不到自定义Router类的报错
   - 修改后可以直接在IDE内运行或者Debug
 
-# 路由算法实现
+## 路由算法实现
 
 参考资料[The ONE使用笔记：目录](http://sparkandshine.net/the-one-use-notes-directory/)
+**路由协议**章节
 
 - 所有的路由协议都是`ActiveRouter.java`的子类，而`ActiveRouter.java`又是`MessageRouter.java`的子类
 
