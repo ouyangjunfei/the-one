@@ -140,7 +140,7 @@ public abstract class MessageRouter {
 				this.sendQueueMode = Q_MODE_RANDOM;
 			} else {
 				this.sendQueueMode = s.getInt(SEND_QUEUE_MODE_S);
-				if (sendQueueMode < 1 || sendQueueMode > 2) {
+				if (sendQueueMode < 1 || sendQueueMode > 3) {
 					throw new SettingsError("Invalid value for " +
 							s.getFullPropertyName(SEND_QUEUE_MODE_S));
 				}
@@ -522,16 +522,15 @@ public abstract class MessageRouter {
 	 * @return The sorted/shuffled list
 	 */
 	@SuppressWarnings(value = "unchecked") /* ugly way to make this generic */
-	protected List sortByQueueMode(List list) {
+	protected <T> List<T> sortByQueueMode(List<T> list) {
 		switch (sendQueueMode) {
 		case Q_MODE_RANDOM:
 			Collections.shuffle(list, new Random(SimClock.getIntTime()));
 			break;
 		case Q_MODE_FIFO:
-			Collections.sort(list,
-					new Comparator() {
+			list.sort(new Comparator<T>() {
 				/** Compares two tuples by their messages' receiving time */
-				public int compare(Object o1, Object o2) {
+				public int compare(T o1, T o2) {
 					double diff;
 					Message m1, m2;
 
@@ -678,5 +677,9 @@ public abstract class MessageRouter {
 		return getClass().getSimpleName() + " of " +
 			this.getHost().toString() + " with " + getNrofMessages()
 			+ " messages";
+	}
+
+	public int getSendQueueMode() {
+		return sendQueueMode;
 	}
 }
