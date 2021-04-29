@@ -1,27 +1,32 @@
 package routing;
 
-import core.Connection;
-import core.DTNHost;
-import core.Message;
-import core.Settings;
+import core.*;
+import util.Tuple;
 
 import java.util.*;
 
 /**
  * 自定义路由算法
+ *
+ * @author Fly
  */
 public class MyEpidemicRouter extends ActiveRouter {
 
     /**
      * 自定义命名空间前缀
      */
-    public static final String CUSTOM_NAMESPACE = "Custom" ;
+    public static final String CUSTOM_NAMESPACE = "Custom";
 
-    public static final String HOST_CACHE_COUNTER = "hostCacheCounter" ;
+    public static final String HOST_CACHE_COUNTER = "hostCacheCounter";
 
-    public static final String HOST_UPDATE_COUNTER = "hostUpdateCounter" ;
+    public static final String HOST_UPDATE_COUNTER = "hostUpdateCounter";
 
-    public static final String HOST_CACHE_FACTOR = "hostCacheFactor" ;
+    public static final String HOST_CACHE_FACTOR = "hostCacheFactor";
+
+    /**
+     * 自定义最少使用规则
+     */
+    public static final int Q_MODE_LFU = 3;
 
     /**
      * 路由内置计数器阈值
@@ -29,7 +34,7 @@ public class MyEpidemicRouter extends ActiveRouter {
     private final int COUNTER_THRESHOLD;
 
     /**
-     * LRU缓存条目清理阈值，缓存表条目的值与其比较
+     * LFU缓存条目清理阈值，缓存表条目的值与其比较
      */
     private final int UPDATE_THRESHOLD;
 
@@ -169,8 +174,8 @@ public class MyEpidemicRouter extends ActiveRouter {
 
             // 得到当前路由携带的消息
             List<Message> messages = new ArrayList<>(this.getMessageCollection());
-            // 通过指定连接发送特定信息，成功一次则返回对应连接
-            Connection connection = tryMessagesToConnections(messages, connectionList);
+            // 通过指定连接发送特定信息，成功一次则返回对应连接，发送前对消息进行排序
+            Connection connection = tryMessagesToConnections(sortByQueueMode(messages), connectionList);
             if (connection != null) {
                 updateCounter(connection.getOtherNode(getHost()));
             }
@@ -183,4 +188,65 @@ public class MyEpidemicRouter extends ActiveRouter {
         return new MyEpidemicRouter(this);
     }
 
+    @Override
+    @SuppressWarnings("unchecked")
+    protected <T> List<T> sortByQueueMode(List<T> list) {
+        if (getSendQueueMode() == Q_MODE_LFU) {
+            list.sort((o1, o2) -> {
+                Message m1, m2;
+                if (o1 instanceof Tuple) {
+                    m1 = ((Tuple<Message, Connection>) o1).getKey();
+                    m2 = ((Tuple<Message, Connection>) o2).getKey();
+                } else if (o1 instanceof Message) {
+                    m1 = (Message) o1;
+                    m2 = (Message) o2;
+                } else {
+                    throw new SimError("Invalid type of objects in the list");
+                }
+                // 关键代码，查找消息目的主机在缓存表中的次数并按照升序排序
+                return hostCacheCounter.getOrDefault(m1.getTo(), 0) - hostCacheCounter.getOrDefault(m2.getTo(), 0);
+            });
+            return list;
+        }
+        return super.sortByQueueMode(list);
+    }
+
+    @Override
+    protected boolean makeRoomForMessage(int size) {
+        // 想获取的空间大于总buffer大小，不可能
+        if (size > this.getBufferSize()) {
+            return false;
+        }
+
+        long freeBuffer = this.getFreeBufferSize();
+        // 删除buffer中的消息直到有足够的空间
+        while (freeBuffer < size) {
+            Message messageToDelete = null;
+            Collection<Message> messages = this.getMessageCollection();
+
+            for (Message m : messages) {
+                // 跳过正在发送的消息
+                if (isSending(m.getId())) {
+                    continue;
+                }
+
+                if (messageToDelete == null) {
+                    messageToDelete = m;
+                } else if (hostCacheCounter.getOrDefault(m.getTo(), 0) > hostCacheCounter.getOrDefault(messageToDelete.getTo(), 0)) {
+                    messageToDelete = m;
+                }
+            }
+
+            // 没有消息
+            if (messageToDelete == null) {
+                return false;
+            }
+
+            // 从buffer中删除消息
+            deleteMessage(messageToDelete.getId(), true);
+            freeBuffer += messageToDelete.getSize();
+        }
+
+        return true;
+    }
 }
