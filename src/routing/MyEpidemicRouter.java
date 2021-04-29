@@ -232,7 +232,8 @@ public class MyEpidemicRouter extends ActiveRouter {
 
                 if (messageToDelete == null) {
                     messageToDelete = m;
-                } else if (hostCacheCounter.getOrDefault(m.getTo(), 0) > hostCacheCounter.getOrDefault(messageToDelete.getTo(), 0)) {
+                } else if (hostCacheCounter.getOrDefault(m.getTo(), 0) >
+                        hostCacheCounter.getOrDefault(messageToDelete.getTo(), 0)) {
                     messageToDelete = m;
                 }
             }
