@@ -1,0 +1,20 @@
+Message stats for scenario my_epidemic_scenario_20_2_0.2_LFU_FINAL
+sim_time: 43200.1000
+created: 1463
+started: 9633
+relayed: 4612
+aborted: 5020
+dropped: 4836
+removed: 0
+delivered: 489
+delivery_prob: 0.3342
+response_prob: 0.0000
+overhead_ratio: 8.4315
+latency_avg: 6428.4953
+latency_med: 5555.2000
+hopcount_avg: 1.5174
+hopcount_med: 1
+buffertime_avg: 5167.5599
+buffertime_med: 2206.0000
+rtt_avg: NaN
+rtt_med: NaN
